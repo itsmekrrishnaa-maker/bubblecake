@@ -23,6 +23,7 @@ interface AdminContextType {
   getProductById: (id: string) => Product | undefined;
   getProductsByCategory: (category: string) => Product[];
   isAdmin: boolean;
+  isLoaded: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   adminEmail: string | null;
@@ -146,6 +147,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         getProductById,
         getProductsByCategory,
         isAdmin,
+        isLoaded,
         login,
         logout,
         adminEmail,
