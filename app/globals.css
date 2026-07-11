@@ -1,0 +1,323 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground: #171717;
+  --background: #ffffff;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Floating Bubbles Animation */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+  filter: blur(0.6px) saturate(1.3) brightness(1.15);
+  transition: transform 0.6s ease-out, opacity 0.3s ease;
+  box-shadow: inset 0 -4px 12px rgba(255, 255, 255, 0.5), inset 0 4px 20px rgba(255, 255, 255, 0.4), inset 0 0 40% 15% rgba(255, 255, 255, 0.35);
+}
+
+/* Combined slow drift + gentle wobble — feels like floating in air */
+.bubble-float {
+  animation: bubble-float var(--float-duration, 20s) ease-in-out var(--float-delay, 0s) infinite alternate;
+}
+
+@keyframes bubble-float {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+  15% {
+    transform: translateY(-4vh) translateX(1vw) rotate(3deg);
+  }
+  30% {
+    transform: translateY(-1.5vh) translateX(-0.8vw) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-6vh) translateX(0.5vw) rotate(2.5deg);
+  }
+  70% {
+    transform: translateY(-3vh) translateX(-1.2vw) rotate(-3deg);
+  }
+  85% {
+    transform: translateY(-7vh) translateX(0.8vw) rotate(2deg);
+  }
+  100% {
+    transform: translateY(-5vh) translateX(-0.6vw) rotate(-1deg);
+  }
+}
+
+/* Slider Styles */
+.slider-container {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+}
+
+.slider-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.slide {
+  min-width: 100%;
+  position: relative;
+}
+
+.slide img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FFB6C1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF69B4;
+}
+
+/* Quantity controls */
+.quantity-btn {
+  @apply w-8 h-8 rounded-full flex items-center justify-center font-bold transition-all;
+  @apply bg-pink-100 text-pink-600 hover:bg-pink-200 active:scale-95;
+}
+
+.quantity-btn:active {
+  transform: scale(0.95);
+}
+
+/* Card hover effect */
+.cake-card {
+  @apply transition-all duration-300;
+}
+
+.cake-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Category badge */
+.category-badge {
+  @apply absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-semibold;
+  @apply bg-white/90 backdrop-blur-sm text-pink-600;
+}
+
+/* Price tag */
+.price-tag {
+  @apply text-lg font-bold text-pink-600;
+}
+
+/* Navigation active state */
+.nav-link {
+  @apply relative;
+}
+
+.nav-link::after {
+  content: '';
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-pink-500 transition-all duration-300;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  @apply w-full;
+}
+
+/* Glass morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Mobile menu */
+.mobile-menu {
+  @apply fixed inset-0 bg-black/50 z-40 opacity-0 pointer-events-none transition-opacity duration-300;
+}
+
+.mobile-menu.open {
+  @apply opacity-100 pointer-events-auto;
+}
+
+/* Addon card */
+.addon-card {
+  @apply border-2 border-gray-100 rounded-xl p-4 transition-all cursor-pointer;
+}
+
+.addon-card.selected {
+  @apply border-pink-500 bg-pink-50;
+}
+
+.addon-card:hover {
+  @apply border-pink-300;
+}
+
+/* Cart sidebar animation */
+.cart-sidebar-enter {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Checkout modal animation */
+.checkout-modal-enter {
+  animation: fade-in 0.2s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Scrolling marquee */
+.marquee {
+  overflow: hidden;
+  width: 100%;
+}
+
+.marquee-content {
+  animation: marquee-scroll 20s linear infinite;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Footer cake animations */
+.footer-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.footer-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 40px rgba(236, 72, 153, 0.15);
+}
+
+/* Floating cake emoji animation */
+.footer-float-cake {
+  animation: footer-float 4s ease-in-out infinite;
+}
+
+@keyframes footer-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(10deg);
+  }
+}
+
+/* Candle flame flicker */
+.footer-candle {
+  display: inline-block;
+  animation: flicker 1.5s ease-in-out infinite alternate;
+}
+
+.footer-candle.flame-1 { animation-delay: 0s; }
+.footer-candle.flame-2 { animation-delay: 0.3s; }
+.footer-candle.flame-3 { animation-delay: 0.6s; }
+
+@keyframes flicker {
+  0% {
+    transform: scale(1) rotate(-3deg);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.2) rotate(3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.9) rotate(-2deg);
+    opacity: 0.8;
+  }
+}
+
+/* Pulsing heart */
+.footer-heart {
+  display: inline-block;
+  animation: heart-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes heart-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Glow pulse for icons */
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 2px rgba(236, 72, 153, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.6));
+  }
+}
+
+/* Hide scrollbar for horizontal scroll containers */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Review card slide-in animation */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(40px) scale(0.95) rotateY(-3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotateY(0deg);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.6s ease-out;
+}

@@ -1,0 +1,39 @@
+{
+  "addons": [
+    {
+      "id": "popper",
+      "name": "Popper",
+      "price": 150,
+      "emoji": "🎉",
+      "description": "Celebration popper for the party"
+    },
+    {
+      "id": "candle",
+      "name": "Candle Set",
+      "price": 100,
+      "emoji": "🕯️",
+      "description": "Set of colorful birthday candles"
+    },
+    {
+      "id": "spray",
+      "name": "Spray",
+      "price": 200,
+      "emoji": "🎊",
+      "description": "Party spray for celebration"
+    },
+    {
+      "id": "curtain",
+      "name": "Curtain",
+      "price": 250,
+      "emoji": "🎀",
+      "description": "Decorative backdrop curtain"
+    },
+    {
+      "id": "topper",
+      "name": "Birthday Topper",
+      "price": 180,
+      "emoji": "🎂",
+      "description": "Happy Birthday cake topper"
+    }
+  ]
+}
