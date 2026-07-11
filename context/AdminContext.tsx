@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
 import { cakes as defaultCakes } from '@/data';
 
 export interface Product {
@@ -22,13 +23,12 @@ interface AdminContextType {
   getProductById: (id: string) => Product | undefined;
   getProductsByCategory: (category: string) => Product[];
   isAdmin: boolean;
-  login: (pin: string) => boolean;
-  logout: () => void;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
+  adminEmail: string | null;
 }
 
 const PRODUCTS_STORAGE_KEY = 'bubble-cake-products';
-const ADMIN_AUTH_KEY = 'bubble-cake-admin-auth';
-const ADMIN_PIN = '1234';
 
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
@@ -50,23 +50,6 @@ function saveProducts(products: Product[]) {
   } catch {}
 }
 
-function loadAdminAuth(): boolean {
-  if (typeof window === 'undefined') return false;
-  try {
-    const stored = localStorage.getItem(ADMIN_AUTH_KEY);
-    return stored === 'true';
-  } catch {
-    return false;
-  }
-}
-
-function saveAdminAuth(isAdmin: boolean) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(ADMIN_AUTH_KEY, String(isAdmin));
-  } catch {}
-}
-
 function generateProductId(category: string, existingProducts: Product[]): string {
   const categoryProducts = existingProducts.filter(p => p.category === category);
   const nextNum = categoryProducts.length + 1;
@@ -76,12 +59,36 @@ function generateProductId(category: string, existingProducts: Product[]): strin
 export function AdminProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setProducts(loadProducts());
-    setIsAdmin(loadAdminAuth());
-    setIsLoaded(true);
+
+    // Check for existing Supabase session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setIsAdmin(true);
+        setAdminEmail(session.user.email || null);
+      }
+      setIsLoaded(true);
+    };
+
+    checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        setIsAdmin(true);
+        setAdminEmail(session.user.email || null);
+      } else {
+        setIsAdmin(false);
+        setAdminEmail(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -108,18 +115,25 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const getProductsByCategory = (category: string) => products.filter(p => p.category === category);
 
-  const login = (pin: string): boolean => {
-    if (pin === ADMIN_PIN) {
-      setIsAdmin(true);
-      saveAdminAuth(true);
-      return true;
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return { success: false, error: error.message };
     }
-    return false;
+
+    setIsAdmin(true);
+    setAdminEmail(data.user.email || null);
+    return { success: true };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setIsAdmin(false);
-    saveAdminAuth(false);
+    setAdminEmail(null);
   };
 
   return (
@@ -134,6 +148,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
         isAdmin,
         login,
         logout,
+        adminEmail,
       }}
     >
       {children}

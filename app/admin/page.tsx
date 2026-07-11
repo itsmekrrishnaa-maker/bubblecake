@@ -6,17 +6,22 @@ import { useAdmin } from '@/context/AdminContext';
 import AdminLayout from '@/components/admin/AdminLayout';
 
 export default function AdminPage() {
-  const { isAdmin, login, products } = useAdmin();
-  const [pin, setPin] = useState('');
+  const { isAdmin, login, logout, products, adminEmail } = useAdmin();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (login(pin)) {
-      setPin('');
-      setError('');
-    } else {
-      setError('Invalid PIN. Default PIN is 1234');
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    const result = await login(email, password);
+    if (!result.success) {
+      setError(result.error || 'Invalid email or password');
     }
+    setLoading(false);
   };
 
   if (!isAdmin) {
@@ -26,39 +31,58 @@ export default function AdminPage() {
           <div className="text-center mb-8">
             <span className="text-5xl block mb-4">🔐</span>
             <h1 className="text-2xl font-bold text-gray-800">Admin Login</h1>
-            <p className="text-gray-500 mt-2">Enter your admin PIN to continue</p>
+            <p className="text-gray-500 mt-2">Sign in with your admin credentials</p>
           </div>
-          <div className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label htmlFor="pin" className="block text-sm font-medium text-gray-700 mb-1">
-                PIN Code
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email
               </label>
               <input
-                id="pin"
-                type="password"
-                value={pin}
+                id="email"
+                type="email"
+                value={email}
                 onChange={(e) => {
-                  setPin(e.target.value);
+                  setEmail(e.target.value);
                   setError('');
                 }}
-                placeholder="Enter 4-digit PIN"
-                maxLength={4}
-                className={`w-full p-3 border-2 rounded-xl text-center text-2xl tracking-widest focus:outline-none ${
-                  error ? 'border-red-400' : 'border-gray-200 focus:border-indigo-500'
-                }`}
-                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                placeholder="admin@bubblecake.com"
+                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
+                required
               />
-              {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
             </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError('');
+                }}
+                placeholder="Enter your password"
+                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:outline-none"
+                required
+              />
+            </div>
+            {error && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
             <button
-              onClick={handleLogin}
-              className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors"
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
             >
-              Login
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
-          </div>
+          </form>
           <p className="text-xs text-gray-400 text-center mt-4">
-            Default PIN: 1234
+            Only authorized administrators can access this panel.
           </p>
         </div>
       </div>
@@ -72,7 +96,18 @@ export default function AdminPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-500">{adminEmail}</span>
+            <button
+              onClick={logout}
+              className="px-4 py-2 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors text-sm"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
