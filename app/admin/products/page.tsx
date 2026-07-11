@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAdmin } from '@/context/AdminContext';
@@ -16,7 +16,7 @@ const categories = [
   { id: 'custom', name: 'Custom', emoji: '✨' },
 ];
 
-export default function ProductsPage() {
+function ProductsContent() {
   const searchParams = useSearchParams();
   const { products, deleteProduct, isAdmin } = useAdmin();
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -115,5 +115,17 @@ export default function ProductsPage() {
         <ProductTable products={filteredProducts} onDelete={deleteProduct} />
       </div>
     </AdminLayout>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-xl text-gray-500">Loading...</div>
+      </div>
+    }>
+      <ProductsContent />
+    </Suspense>
   );
 }
