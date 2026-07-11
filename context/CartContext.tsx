@@ -50,7 +50,7 @@ interface CartContextType {
   isCheckoutOpen: boolean;
   openCheckout: () => void;
   closeCheckout: () => void;
-  placeOrder: (data: Omit<OrderDetails, 'id' | 'items' | 'total' | 'status' | 'createdAt'>) => void;
+  placeOrder: (data: Omit<OrderDetails, 'id' | 'items' | 'total' | 'status' | 'createdAt'>) => Promise<void>;
   orderPlaced: boolean;
   orderDetails: OrderDetails | null;
   editingItem: CartItem | null;
@@ -59,12 +59,12 @@ interface CartContextType {
   cancelEdit: () => void;
   maxQuantity: number;
   orders: OrderDetails[];
-  getOrderById: (id: string) => OrderDetails | undefined;
+  getOrderById: (id: string) => Promise<OrderDetails | undefined>;
+  fetchOrders: () => Promise<void>;
 }
 
 const MAX_QUANTITY = 10;
 const CART_STORAGE_KEY = 'bubble-cake-cart';
-const ORDERS_STORAGE_KEY = 'bubble-cake-orders';
 const ADVANCE_PERCENTAGE = 0.5;
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -92,21 +92,27 @@ function saveCart(items: CartItem[]) {
   } catch {}
 }
 
-function loadOrders(): OrderDetails[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const stored = localStorage.getItem(ORDERS_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveOrders(orders: OrderDetails[]) {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem(ORDERS_STORAGE_KEY, JSON.stringify(orders));
-  } catch {}
+// Map Supabase row to OrderDetails
+function mapDbOrder(row: Record<string, unknown>): OrderDetails {
+  return {
+    id: row.id as string,
+    items: row.items as CartItem[],
+    total: row.total as number,
+    deliveryFee: (row.delivery_fee as number) || 0,
+    name: row.name as string,
+    phone: row.phone as string,
+    address: row.address as string,
+    paymentMethod: row.payment_method as 'cod' | 'qr',
+    advancePaid: (row.advance_paid as number) || 0,
+    paymentScreenshot: row.payment_screenshot as string | undefined,
+    remarks: row.remarks as string | undefined,
+    referenceImage: row.reference_image as string | undefined,
+    deliveryDate: row.delivery_date as string,
+    deliveryZone: row.delivery_zone as string,
+    deliveryArea: row.delivery_area as string,
+    status: row.status as OrderDetails['status'],
+    createdAt: row.created_at as string,
+  };
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -121,7 +127,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setItems(loadCart());
-    setOrders(loadOrders());
+    fetchOrders();
     setIsLoaded(true);
   }, []);
 
@@ -129,9 +135,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (isLoaded) saveCart(items);
   }, [items, isLoaded]);
 
-  useEffect(() => {
-    if (isLoaded) saveOrders(orders);
-  }, [orders, isLoaded]);
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch('/api/orders');
+      if (res.ok) {
+        const data = await res.json();
+        setOrders(data.map(mapDbOrder));
+      }
+    } catch {
+      // Fallback to empty array on error
+    }
+  };
 
   const addonsMatch = (a: { [key: string]: number }, b: { [key: string]: number }) => {
     const keysA = Object.keys(a);
@@ -143,12 +157,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const addItem = (item: Omit<CartItem, 'id'>) => {
     setEditingItem(null);
     setItems((prev) => {
-      // Check if same cake name already exists (same cake, different flavor/size)
       const sameCakeIndex = prev.findIndex(
         (existing) => existing.name === item.name
       );
       if (sameCakeIndex !== -1) {
-        // Update the existing cake with new flavor/size/addons/zone
         const updated = [...prev];
         updated[sameCakeIndex] = {
           ...updated[sameCakeIndex],
@@ -192,7 +204,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const openCheckout = () => { setIsCheckoutOpen(true); setIsCartOpen(false); };
   const closeCheckout = () => { setIsCheckoutOpen(false); setIsCartOpen(true); };
 
-  const placeOrder = (data: Omit<OrderDetails, 'id' | 'items' | 'total' | 'status' | 'createdAt'>) => {
+  const placeOrder = async (data: Omit<OrderDetails, 'id' | 'items' | 'total' | 'status' | 'createdAt'>) => {
     const newOrder: OrderDetails = {
       id: generateId(),
       items: [...items],
@@ -201,8 +213,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
       status: 'pending',
       createdAt: new Date().toISOString(),
     };
+
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newOrder),
+      });
+
+      if (res.ok) {
+        const savedOrder = await res.json();
+        setOrders((prev) => [mapDbOrder(savedOrder), ...prev]);
+      } else {
+        // Fallback: save locally if API fails
+        setOrders((prev) => [newOrder, ...prev]);
+      }
+    } catch {
+      // Fallback: save locally if API fails
+      setOrders((prev) => [newOrder, ...prev]);
+    }
+
     setOrderDetails(newOrder);
-    setOrders((prev) => [newOrder, ...prev]);
     setOrderPlaced(true);
     setTimeout(() => {
       clearCart();
@@ -212,7 +243,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }, 30000);
   };
 
-  const getOrderById = (id: string) => orders.find((o) => o.id === id);
+  const getOrderById = async (id: string): Promise<OrderDetails | undefined> => {
+    // First check local state
+    const local = orders.find((o) => o.id === id);
+    if (local) return local;
+
+    // Fetch from API
+    try {
+      const res = await fetch(`/api/orders/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        return mapDbOrder(data);
+      }
+    } catch {}
+    return undefined;
+  };
 
   return (
     <CartContext.Provider
@@ -223,7 +268,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         placeOrder, orderPlaced, orderDetails,
         editingItem, startEditItem, updateCartItem, cancelEdit,
         maxQuantity: MAX_QUANTITY,
-        orders, getOrderById,
+        orders, getOrderById, fetchOrders,
       }}
     >
       {children}

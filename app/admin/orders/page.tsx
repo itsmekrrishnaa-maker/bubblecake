@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAdmin } from '@/context/AdminContext';
 import { useCart, OrderDetails } from '@/context/CartContext';
@@ -26,9 +26,14 @@ const statusOptions = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 
 
 export default function AdminOrdersPage() {
   const { isAdmin } = useAdmin();
-  const { orders } = useCart();
+  const { orders, fetchOrders } = useCart();
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   if (!isAdmin) {
     return (
@@ -57,18 +62,23 @@ export default function AdminOrdersPage() {
     return acc;
   }, {} as Record<string, number>);
 
-  const handleStatusChange = (orderId: string, newStatus: OrderDetails['status']) => {
-    // Update order status in localStorage
-    const stored = localStorage.getItem('bubble-cake-orders');
-    if (stored) {
-      const allOrders = JSON.parse(stored);
-      const updatedOrders = allOrders.map((o: OrderDetails) =>
-        o.id === orderId ? { ...o, status: newStatus } : o
-      );
-      localStorage.setItem('bubble-cake-orders', JSON.stringify(updatedOrders));
-      // Reload page to reflect changes
-      window.location.reload();
+  const handleStatusChange = async (orderId: string, newStatus: OrderDetails['status']) => {
+    setUpdatingId(orderId);
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (res.ok) {
+        // Refresh orders from API
+        await fetchOrders();
+      }
+    } catch {
+      // Error updating status
     }
+    setUpdatingId(null);
   };
 
   return (
@@ -80,6 +90,12 @@ export default function AdminOrdersPage() {
             <h1 className="text-3xl font-bold text-gray-800">Orders</h1>
             <p className="text-gray-500 mt-1">{orders.length} total orders</p>
           </div>
+          <button
+            onClick={() => fetchOrders()}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm"
+          >
+            🔄 Refresh
+          </button>
         </div>
 
         {/* Status Tabs */}
@@ -233,7 +249,8 @@ export default function AdminOrdersPage() {
                           <select
                             value={order.status}
                             onChange={(e) => handleStatusChange(order.id, e.target.value as OrderDetails['status'])}
-                            className="p-2 border-2 border-gray-200 rounded-xl text-sm focus:border-indigo-500 focus:outline-none"
+                            disabled={updatingId === order.id}
+                            className="p-2 border-2 border-gray-200 rounded-xl text-sm focus:border-indigo-500 focus:outline-none disabled:opacity-50"
                           >
                             {statusOptions.map((status) => (
                               <option key={status} value={status}>
@@ -241,6 +258,9 @@ export default function AdminOrdersPage() {
                               </option>
                             ))}
                           </select>
+                          {updatingId === order.id && (
+                            <span className="text-xs text-gray-400">Saving...</span>
+                          )}
                         </div>
                       </div>
 

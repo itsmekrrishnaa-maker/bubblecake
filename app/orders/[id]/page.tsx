@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useCart, ADVANCE_PERCENTAGE } from '@/context/CartContext';
+import { useCart, ADVANCE_PERCENTAGE, OrderDetails } from '@/context/CartContext';
 import { addons as addonData } from '@/data';
 import { deliveryZones } from '@/data/locations';
 
@@ -23,7 +24,26 @@ const statusLabels: Record<string, string> = {
 
 export default function OrderDetailPage({ params }: { params: { id: string } }) {
   const { getOrderById } = useCart();
-  const order = getOrderById(params.id);
+  const [order, setOrder] = useState<OrderDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      const data = await getOrderById(params.id);
+      setOrder(data || null);
+      setLoading(false);
+    };
+    fetchOrder();
+  }, [params.id, getOrderById]);
+
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+        <p className="text-gray-500">Loading order details...</p>
+      </div>
+    );
+  }
 
   if (!order) {
     return (
@@ -85,7 +105,7 @@ Method: ${order.paymentMethod === 'qr' ? 'QR Payment (Advance)' : 'Cash on Deliv
 ${order.paymentMethod === 'qr' ? `Advance Paid: NPR ${advanceAmount.toLocaleString()}\nRemaining on Delivery: NPR ${remainingAmount.toLocaleString()}` : `Full amount: NPR ${order.total.toLocaleString()}`}
 ${order.remarks ? `\nRemarks: ${order.remarks}` : ''}
 
-=====================
+====================
 Bubble Cake - Kathmandu, Nepal
 info@bubblecake.com | +977-984-1234567
     `.trim();

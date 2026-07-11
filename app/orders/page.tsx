@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { deliveryZones } from '@/data/locations';
@@ -21,7 +22,11 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function OrdersPage() {
-  const { orders } = useCart();
+  const { orders, fetchOrders } = useCart();
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
