@@ -211,7 +211,7 @@ export default function AdminOrdersPage() {
                                 {item.flavor} • {item.size} • Qty: {item.quantity}
                               </p>
                               {item.message && (
-                                <p className="text-sm text-pink-500 mt-1">"{item.message}"</p>
+                                <p className="text-sm text-pink-500 mt-1">&quot;{item.message}&quot;</p>
                               )}
                             </div>
                           ))}
