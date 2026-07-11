@@ -20,6 +20,7 @@ interface OrderDetails {
   id: string;
   items: CartItem[];
   total: number;
+  deliveryFee: number;
   name: string;
   phone: string;
   address: string;
@@ -195,7 +196,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const newOrder: OrderDetails = {
       id: generateId(),
       items: [...items],
-      total: getTotalPrice(),
+      total: getTotalPrice() + (data.deliveryFee || 0),
       ...data,
       status: 'pending',
       createdAt: new Date().toISOString(),
@@ -208,7 +209,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setOrderPlaced(false);
       setOrderDetails(null);
       setIsCheckoutOpen(false);
-    }, 8000);
+    }, 30000);
   };
 
   const getOrderById = (id: string) => orders.find((o) => o.id === id);

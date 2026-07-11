@@ -117,7 +117,17 @@ export default function AdminPage() {
         {/* Quick Actions */}
         <div className="bg-white rounded-2xl p-6 shadow-lg">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Link
+              href="/admin/orders"
+              className="flex items-center space-x-3 p-4 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors"
+            >
+              <span className="text-2xl">📦</span>
+              <div>
+                <p className="font-medium text-gray-800">View Orders</p>
+                <p className="text-sm text-gray-500">Manage customer orders</p>
+              </div>
+            </Link>
             <Link
               href="/admin/products"
               className="flex items-center space-x-3 p-4 bg-indigo-50 rounded-xl hover:bg-indigo-100 transition-colors"
@@ -140,7 +150,7 @@ export default function AdminPage() {
             </Link>
             <Link
               href="/"
-              className="flex items-center space-x-3 p-4 bg-pink-50 rounded-xl hover:bg-pink-100 transition-colors"
+              className="flex items-center space-x-3 p-4 bg-orange-50 rounded-xl hover:bg-orange-100 transition-colors"
             >
               <span className="text-2xl">🏪</span>
               <div>

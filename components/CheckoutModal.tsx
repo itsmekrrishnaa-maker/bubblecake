@@ -148,6 +148,12 @@ export default function CheckoutModal() {
               ))}
             </div>
             <div className="border-t pt-2 mt-2 space-y-1">
+              {orderDetails.deliveryFee !== undefined && orderDetails.deliveryFee > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Delivery Fee</span>
+                  <span className="font-medium">NPR {orderDetails.deliveryFee.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Total</span>
                 <span className="font-medium">NPR {orderDetails.total.toLocaleString()}</span>
@@ -250,18 +256,20 @@ export default function CheckoutModal() {
       scrollToField(firstErrorRef);
       return;
     }
+    const totalWithDelivery = total + totalDeliveryFee;
     placeOrder({
       name: customerName.trim(),
       phone: phone.trim(),
       address: deliveryAddress.trim(),
       paymentMethod,
-      advancePaid: paymentMethod === 'qr' ? advanceAmount : 0,
+      advancePaid: paymentMethod === 'qr' ? Math.round(totalWithDelivery * ADVANCE_PERCENTAGE) : 0,
       paymentScreenshot: paymentScreenshot || undefined,
       remarks: remarks.trim() || undefined,
       referenceImage: items.find((i) => i.referenceImage)?.referenceImage,
       deliveryDate: getDeliveryDate(),
       deliveryZone: firstItemZone || '',
       deliveryArea: firstItemArea || '',
+      deliveryFee: totalDeliveryFee,
     });
   };
 

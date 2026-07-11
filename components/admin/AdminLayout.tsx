@@ -6,6 +6,7 @@ import { useAdmin } from '@/context/AdminContext';
 
 const adminNavItems = [
   { name: 'Dashboard', href: '/admin', icon: '📊' },
+  { name: 'Orders', href: '/admin/orders', icon: '📦' },
   { name: 'Products', href: '/admin/products', icon: '🎂' },
   { name: 'Add Product', href: '/admin/products/new', icon: '➕' },
 ];

@@ -78,7 +78,8 @@ ${addonLines}`;
 
 PAYMENT
 -------
-Delivery Fee: ${orderZone?.deliveryFee === 0 ? 'Free' : `NPR ${(orderZone?.deliveryFee || 0).toLocaleString()}`}
+Subtotal: NPR ${(order.total - (order.deliveryFee || 0)).toLocaleString()}
+Delivery Fee: ${(order.deliveryFee || 0) === 0 ? 'Free' : `NPR ${(order.deliveryFee || 0).toLocaleString()}`}
 Total: NPR ${order.total.toLocaleString()}
 Method: ${order.paymentMethod === 'qr' ? 'QR Payment (Advance)' : 'Cash on Delivery'}
 ${order.paymentMethod === 'qr' ? `Advance Paid: NPR ${advanceAmount.toLocaleString()}\nRemaining on Delivery: NPR ${remainingAmount.toLocaleString()}` : `Full amount: NPR ${order.total.toLocaleString()}`}
@@ -232,12 +233,12 @@ info@bubblecake.com | +977-984-1234567
           <div className="max-w-xs ml-auto space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">NPR {order.total.toLocaleString()}</span>
+              <span className="font-medium">NPR {(order.total - (order.deliveryFee || 0)).toLocaleString()}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Delivery</span>
-              <span className={`font-medium ${orderZone?.deliveryFee === 0 ? 'text-green-600' : ''}`}>
-                {orderZone?.deliveryFee === 0 ? 'Free' : `NPR ${orderZone?.deliveryFee || 0}`}
+              <span className={`font-medium ${(order.deliveryFee || 0) === 0 ? 'text-green-600' : ''}`}>
+                {(order.deliveryFee || 0) === 0 ? 'Free' : `NPR ${order.deliveryFee}`}
               </span>
             </div>
             {order.paymentMethod === 'qr' && (
