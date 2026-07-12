@@ -402,17 +402,14 @@ export default function CheckoutModal() {
                 onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined })); }}
                 placeholder="e.g., 9841234567"
                 maxLength={10}
-                className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.phone ? 'border-red-400' : phone.length === 10 && /^(98|97|96)\d{8}$/.test(phone) ? 'border-green-500' : 'border-gray-200 focus:border-pink-500'}`}
+                className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.phone ? 'border-red-400' : 'border-gray-200 focus:border-pink-500'}`}
               />
               {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
-              {!errors.phone && phone.length === 10 && /^(98|97|96)\d{8}$/.test(phone) && (
-                <p className="text-sm text-green-600 mt-1">✓ Valid Nepali mobile number</p>
-              )}
               {!errors.phone && phone.length > 0 && phone.length < 10 && (
-                <p className="text-xs text-gray-400 mt-1">{phone.length}/10 digits — must start with 98, 97, or 96</p>
+                <p className="text-sm text-red-500 mt-1">Enter valid mobile number</p>
               )}
               {!errors.phone && phone.length === 10 && !/^(98|97|96)\d{8}$/.test(phone) && (
-                <p className="text-sm text-red-500 mt-1">Must start with 98, 97, or 96</p>
+                <p className="text-sm text-red-500 mt-1">Enter valid mobile number</p>
               )}
             </div>
           </div>
