@@ -69,6 +69,7 @@ export default function CheckoutModal() {
   const [deliveryTime, setDeliveryTime] = useState('');
   const [qrAmountPaid, setQrAmountPaid] = useState('');
   const [errors, setErrors] = useState<{ name?: string; phone?: string; address?: string; screenshot?: string; date?: string; qrAmount?: string }>({});
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLDivElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
@@ -279,13 +280,14 @@ export default function CheckoutModal() {
     return null;
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     const firstErrorRef = validate();
     if (firstErrorRef) {
       scrollToField(firstErrorRef);
       return;
     }
-    placeOrder({
+    setIsPlacingOrder(true);
+    await placeOrder({
       name: customerName.trim(),
       phone: phone.trim(),
       address: deliveryAddress.trim(),
@@ -299,6 +301,7 @@ export default function CheckoutModal() {
       deliveryArea: firstItemArea || '',
       deliveryFee: totalDeliveryFee,
     });
+    setIsPlacingOrder(false);
   };
 
   return (
@@ -626,13 +629,25 @@ export default function CheckoutModal() {
         <div className="sticky bottom-0 bg-white border-t p-5 space-y-3 rounded-b-2xl">
           <button
             onClick={handlePlaceOrder}
-            className="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all"
+            disabled={isPlacingOrder}
+            className="w-full py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-xl hover:from-pink-600 hover:to-purple-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Place Order
+            {isPlacingOrder ? (
+              <>
+                <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Placing Order...
+              </>
+            ) : (
+              'Place Order'
+            )}
           </button>
           <button
             onClick={closeCheckout}
-            className="w-full py-3 text-gray-600 font-medium hover:text-pink-600 transition-colors"
+            disabled={isPlacingOrder}
+            className="w-full py-3 text-gray-600 font-medium hover:text-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Back to Cart
           </button>
