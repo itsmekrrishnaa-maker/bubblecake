@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { deliveryZones } from '@/data/locations';
@@ -23,20 +23,66 @@ const statusLabels: Record<string, string> = {
 
 export default function OrdersPage() {
   const { orders, fetchOrders } = useCart();
+  const [phone, setPhone] = useState('');
+  const [searched, setSearched] = useState(false);
 
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (phone.trim()) {
+      fetchOrders(phone.trim());
+      setSearched(true);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">My Orders</h1>
 
-      {orders.length === 0 ? (
+      {/* Phone Search Form */}
+      {!searched && (
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Find Your Orders</h2>
+          <p className="text-gray-500 mb-4">Enter the phone number you used when placing your order.</p>
+          <form onSubmit={handleSearch} className="flex gap-3">
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="e.g., 9848874295"
+              className="flex-1 p-3 border-2 border-gray-200 rounded-xl focus:border-pink-500 focus:outline-none"
+              required
+            />
+            <button
+              type="submit"
+              className="px-6 py-3 bg-pink-500 text-white font-semibold rounded-xl hover:bg-pink-600 transition-colors"
+            >
+              Find Orders
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Search Again */}
+      {searched && (
+        <div className="bg-gray-50 rounded-xl p-4 mb-6 flex items-center justify-between">
+          <p className="text-sm text-gray-600">
+            Showing orders for: <span className="font-medium">{phone}</span>
+          </p>
+          <button
+            onClick={() => { setSearched(false); setPhone(''); }}
+            className="text-sm text-pink-500 hover:text-pink-600 font-medium"
+          >
+            Search different number
+          </button>
+        </div>
+      )}
+
+      {/* Orders List */}
+      {searched && orders.length === 0 ? (
         <div className="text-center py-16">
           <span className="text-6xl block mb-4">📦</span>
-          <h2 className="text-xl font-semibold text-gray-600 mb-2">No orders yet</h2>
-          <p className="text-gray-400 mb-6">Start ordering delicious cakes!</p>
+          <h2 className="text-xl font-semibold text-gray-600 mb-2">No orders found</h2>
+          <p className="text-gray-400 mb-6">No orders found for this phone number.</p>
           <Link
             href="/"
             className="inline-block px-6 py-3 bg-pink-500 text-white rounded-full hover:bg-pink-600 transition-colors"
@@ -44,7 +90,7 @@ export default function OrdersPage() {
             Browse Cakes
           </Link>
         </div>
-      ) : (
+      ) : searched ? (
         <div className="space-y-6">
           {orders.map((order) => {
             const orderZone = deliveryZones.find((z) => z.id === order.deliveryZone);
@@ -134,7 +180,7 @@ export default function OrdersPage() {
             );
           })}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

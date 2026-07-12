@@ -61,7 +61,7 @@ interface CartContextType {
   maxQuantity: number;
   orders: OrderDetails[];
   getOrderById: (id: string) => Promise<OrderDetails | undefined>;
-  fetchOrders: () => Promise<void>;
+  fetchOrders: (phone?: string) => Promise<void>;
 }
 
 const MAX_QUANTITY = 10;
@@ -136,14 +136,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (isLoaded) saveCart(items);
   }, [items, isLoaded]);
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (phone?: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const headers: Record<string, string> = {};
       if (session) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
-      const res = await fetch('/api/orders', { headers });
+      const url = phone ? `/api/orders?phone=${encodeURIComponent(phone)}` : '/api/orders';
+      const res = await fetch(url, { headers });
       if (res.ok) {
         const data = await res.json();
         setOrders(data.map(mapDbOrder));
@@ -229,17 +230,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
       if (res.ok) {
         const savedOrder = await res.json();
+        // Use the saved order from DB (with server-generated fields)
         setOrders((prev) => [mapDbOrder(savedOrder), ...prev]);
+        setOrderDetails(mapDbOrder(savedOrder));
       } else {
         // Fallback: save locally if API fails
         setOrders((prev) => [newOrder, ...prev]);
+        setOrderDetails(newOrder);
       }
     } catch {
       // Fallback: save locally if API fails
       setOrders((prev) => [newOrder, ...prev]);
+      setOrderDetails(newOrder);
     }
 
-    setOrderDetails(newOrder);
     setOrderPlaced(true);
     setTimeout(() => {
       clearCart();

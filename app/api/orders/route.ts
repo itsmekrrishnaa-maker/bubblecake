@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-// GET /api/orders — Get all orders (admin only, or filter by phone for customers)
+// GET /api/orders — Get orders
+// - Admin (authenticated): can see ALL orders
+// - Customer (with phone param): can see their own orders
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const phone = searchParams.get('phone');
@@ -16,11 +18,11 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false });
 
   if (phone) {
-    // Customers can only see their own orders
+    // Customers can see their own orders by phone number
     query = query.eq('phone', phone);
   } else if (!isAdmin) {
-    // Non-admin users cannot see all orders
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Non-admin without phone param cannot see all orders
+    return NextResponse.json([]);
   }
 
   const { data, error } = await query;
