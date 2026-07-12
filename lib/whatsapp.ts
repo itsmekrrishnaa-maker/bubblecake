@@ -29,8 +29,11 @@ export function getOrderWhatsAppMessage(order: OrderDetails): string {
 
   let msg = `🎂 *NEW ORDER - Bubble Cake*\n\n`;
   msg += `📦 Order #${order.id.slice(0, 8).toUpperCase()}\n`;
-  msg += `👤 ${order.name}\n`;
-  msg += `📞 ${order.phone}\n\n`;
+  msg += `👤 Sender: ${order.name}\n`;
+  if (order.recipientName) {
+    msg += `🎁 Recipient: ${order.recipientName}\n`;
+  }
+  msg += `📞 Recipient Phone: ${order.phone}\n\n`;
   msg += `🍰 *Items:*\n${formatOrderItems(order)}\n\n`;
   msg += `💰 *Total: NPR ${order.total.toLocaleString()}*\n`;
   msg += `💳 Payment: ${order.paymentMethod === 'qr' ? 'QR Payment (Advance Paid)' : 'Cash on Delivery'}\n`;

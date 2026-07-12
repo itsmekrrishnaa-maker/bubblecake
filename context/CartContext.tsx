@@ -23,6 +23,7 @@ interface OrderDetails {
   total: number;
   deliveryFee: number;
   name: string;
+  recipientName?: string;
   phone: string;
   address: string;
   paymentMethod: 'cod' | 'qr';
@@ -101,6 +102,7 @@ function mapDbOrder(row: Record<string, unknown>): OrderDetails {
     total: row.total as number,
     deliveryFee: (row.delivery_fee as number) || 0,
     name: row.name as string,
+    recipientName: row.recipient_name as string | undefined,
     phone: row.phone as string,
     address: row.address as string,
     paymentMethod: row.payment_method as 'cod' | 'qr',

@@ -46,6 +46,7 @@ export async function POST(request: NextRequest) {
       total: body.total,
       delivery_fee: body.deliveryFee || 0,
       name: body.name,
+      recipient_name: body.recipientName || null,
       phone: body.phone,
       address: body.address,
       payment_method: body.paymentMethod,

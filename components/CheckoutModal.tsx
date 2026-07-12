@@ -59,6 +59,7 @@ export default function CheckoutModal() {
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'qr'>('cod');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [recipientName, setRecipientName] = useState('');
   const [phone, setPhone] = useState('');
   const [remarks, setRemarks] = useState('');
   const [paymentScreenshot, setPaymentScreenshot] = useState<string | null>(null);
@@ -68,10 +69,11 @@ export default function CheckoutModal() {
   const [customDate, setCustomDate] = useState('');
   const [deliveryTime, setDeliveryTime] = useState('');
   const [qrAmountPaid, setQrAmountPaid] = useState('');
-  const [errors, setErrors] = useState<{ name?: string; phone?: string; address?: string; screenshot?: string; date?: string; qrAmount?: string }>({});
+  const [errors, setErrors] = useState<{ name?: string; recipientName?: string; phone?: string; address?: string; screenshot?: string; date?: string; qrAmount?: string }>({});
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLDivElement>(null);
+  const recipientNameRef = useRef<HTMLDivElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
   const addressRef = useRef<HTMLDivElement>(null);
   const dateRef = useRef<HTMLDivElement>(null);
@@ -258,6 +260,7 @@ export default function CheckoutModal() {
   const validate = (): React.RefObject<HTMLDivElement> | null => {
     const newErrors: typeof errors = {};
     if (!customerName.trim()) newErrors.name = 'Please enter your name';
+    if (!recipientName.trim()) newErrors.recipientName = 'Please enter recipient name';
     if (!phone.trim()) newErrors.phone = 'Please enter your phone number';
     else if (!/^\d{10}$/.test(phone.trim())) newErrors.phone = 'Phone number must be exactly 10 digits';
     else if (!/^(98|97|96)\d{8}$/.test(phone.trim())) newErrors.phone = 'Enter valid mobile number';
@@ -272,6 +275,7 @@ export default function CheckoutModal() {
     if (Object.keys(newErrors).length === 0) return null;
 
     if (newErrors.name) return nameRef;
+    if (newErrors.recipientName) return recipientNameRef;
     if (newErrors.phone) return phoneRef;
     if (newErrors.date) return dateRef;
     if (newErrors.address) return addressRef;
@@ -289,6 +293,7 @@ export default function CheckoutModal() {
     setIsPlacingOrder(true);
     await placeOrder({
       name: customerName.trim(),
+      recipientName: recipientName.trim(),
       phone: phone.trim(),
       address: deliveryAddress.trim(),
       paymentMethod,
@@ -424,7 +429,7 @@ export default function CheckoutModal() {
             <h3 className="text-lg font-semibold text-gray-800">Your Details</h3>
             <div ref={nameRef} className="scroll-mt-4">
               <label htmlFor="customer-name" className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name <span className="text-red-400">*</span>
+                Your Name <span className="text-red-400">*</span>
               </label>
               <input
                 id="customer-name"
@@ -436,9 +441,26 @@ export default function CheckoutModal() {
               />
               {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
             </div>
+
+            <div ref={recipientNameRef} className="scroll-mt-4">
+              <label htmlFor="recipient-name" className="block text-sm font-medium text-gray-700 mb-1">
+                Recipient Name <span className="text-red-400">*</span>
+                <span className="text-xs text-gray-400 ml-2">(Who receives the cake)</span>
+              </label>
+              <input
+                id="recipient-name"
+                type="text"
+                value={recipientName}
+                onChange={(e) => { setRecipientName(e.target.value); if (errors.recipientName) setErrors((prev) => ({ ...prev, recipientName: undefined })); }}
+                placeholder="e.g., Ama, Didi, Friend"
+                className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.recipientName ? 'border-red-400' : 'border-gray-200 focus:border-pink-500'}`}
+              />
+              {errors.recipientName && <p className="text-sm text-red-500 mt-1">{errors.recipientName}</p>}
+            </div>
+
             <div ref={phoneRef} className="scroll-mt-4">
               <label htmlFor="customer-phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Mobile Number <span className="text-red-400">*</span>
+                Recipient Mobile Number <span className="text-red-400">*</span>
               </label>
               <input
                 id="customer-phone"
