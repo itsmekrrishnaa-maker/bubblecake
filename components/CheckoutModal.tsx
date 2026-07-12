@@ -260,7 +260,7 @@ export default function CheckoutModal() {
     if (!customerName.trim()) newErrors.name = 'Please enter your name';
     if (!phone.trim()) newErrors.phone = 'Please enter your phone number';
     else if (!/^\d{10}$/.test(phone.trim())) newErrors.phone = 'Phone number must be exactly 10 digits';
-    else if (!/^(98|97|96)\d{8}$/.test(phone.trim())) newErrors.phone = 'Must be valid Nepali number (98, 97, or 96 prefix)';
+    else if (!/^(98|97|96)\d{8}$/.test(phone.trim())) newErrors.phone = 'Enter valid mobile number';
     if (!deliveryAddress.trim()) newErrors.address = 'Please enter your delivery address';
     else if (deliveryAddress.trim().length > 50) newErrors.address = 'Address must be 50 characters or less';
     if (paymentMethod === 'qr' && !paymentScreenshot) newErrors.screenshot = 'Please upload payment screenshot';
@@ -396,7 +396,7 @@ export default function CheckoutModal() {
             </div>
             <div ref={phoneRef} className="scroll-mt-4">
               <label htmlFor="customer-phone" className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number <span className="text-red-400">*</span>
+                Mobile Number <span className="text-red-400">*</span>
               </label>
               <input
                 id="customer-phone"
