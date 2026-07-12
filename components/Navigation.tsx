@@ -56,7 +56,18 @@ export default function Navigation() {
             </div>
 
             {/* Cart Icon */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <Link
+                href="/orders"
+                className={`md:hidden flex items-center gap-1 px-2 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                  pathname === '/orders' ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50'
+                }`}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                My Orders
+              </Link>
               <Link
                 href="/orders"
                 className={`hidden md:flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
