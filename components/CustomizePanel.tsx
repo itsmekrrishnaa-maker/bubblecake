@@ -259,10 +259,10 @@ export default function CustomizePanel({ basePrice, addons, cakeName }: Customiz
               </select>
             </div>
           )}
-          {selectedZone && currentZone && (
-            <div className="flex items-center gap-2 text-sm text-gray-600 bg-white/60 px-3 py-2 rounded-lg">
-              <span>⏱️</span>
-              <span>Estimated delivery: <span className="font-medium text-pink-600">{currentZone.estimatedTime}</span></span>
+          {selectedZone && currentZone && currentZone.deliveryFee === 0 && (
+            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 px-3 py-2 rounded-lg">
+              <span>✓</span>
+              <span>Free delivery in this zone!</span>
             </div>
           )}
           {!currentZone?.available && selectedZone && (
@@ -272,6 +272,11 @@ export default function CustomizePanel({ basePrice, addons, cakeName }: Customiz
             <p className="text-sm text-red-500">Please select a delivery zone and area</p>
           )}
         </div>
+      </div>
+
+      {/* Customize Your Cake - after Delivery Location */}
+      <div className="p-4 bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl border border-pink-100">
+        <h2 className="text-xl font-bold text-gray-800 mb-4">Customize Your Cake</h2>
       </div>
 
       {/* Flavor Selection */}
@@ -464,7 +469,7 @@ export default function CustomizePanel({ basePrice, addons, cakeName }: Customiz
       {/* Price Summary */}
       <div className="border-t pt-4">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-gray-600">Cake + Size</span>
+          <span className="text-gray-600">{flavors.find(f => f.id === selectedFlavor)?.name} ({cakeName}) + {sizes.find(s => s.id === selectedSize)?.name}</span>
           <span className="font-medium">NPR {Math.round(basePrice * (sizes.find((s) => s.id === selectedSize)?.multiplier || 1)).toLocaleString()}</span>
         </div>
         <div className="flex justify-between items-center mb-2">

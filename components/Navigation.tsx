@@ -67,14 +67,11 @@ export default function Navigation() {
             <div className="flex items-center space-x-4">
               <Link
                 href="/orders"
-                className={`hidden md:flex p-2 text-gray-600 hover:text-pink-600 transition-colors ${
-                  pathname === '/orders' ? 'text-pink-600' : ''
+                className={`hidden md:flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname === '/orders' ? 'text-pink-600 bg-pink-50' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50'
                 }`}
-                title="My Orders"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
+                My Orders
               </Link>
 
               <button

@@ -179,17 +179,19 @@ export default function CartSidebar() {
                         </span>
                       </div>
                     )}
-                    {item.message && (
-                      <div className="flex justify-between text-pink-500">
-                        <span>Message</span>
-                        <span className="text-xs truncate ml-2">&quot;{item.message}&quot;</span>
-                      </div>
-                    )}
                     <div className="flex justify-between font-bold text-gray-800 border-t pt-2 mt-2">
                       <span>Subtotal</span>
                       <span className="text-pink-600">NPR {(item.price * item.quantity).toLocaleString()}</span>
                     </div>
                   </div>
+
+                  {/* Message on Cake */}
+                  {item.message && (
+                    <div className="mt-3 p-3 bg-pink-50 rounded-lg border border-pink-100">
+                      <p className="text-xs text-gray-500 mb-1">Message on Cake:</p>
+                      <p className="text-sm text-pink-600 font-medium">&quot;{item.message}&quot;</p>
+                    </div>
+                  )}
                 </div>
               );
             })
