@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabase';
 
 interface CartItem {
   id: string;
@@ -137,7 +138,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch('/api/orders');
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = {};
+      if (session) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      const res = await fetch('/api/orders', { headers });
       if (res.ok) {
         const data = await res.json();
         setOrders(data.map(mapDbOrder));

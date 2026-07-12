@@ -6,6 +6,12 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Check if user is authenticated
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { data, error } = await supabase
     .from('orders')
     .select('*')
@@ -19,11 +25,17 @@ export async function GET(
   return NextResponse.json(data);
 }
 
-// PATCH /api/orders/[id] — Update order status
+// PATCH /api/orders/[id] — Update order status (admin only)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Check if user is authenticated
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const body = await request.json();
 
   const { data, error } = await supabase
@@ -40,11 +52,17 @@ export async function PATCH(
   return NextResponse.json(data);
 }
 
-// DELETE /api/orders/[id] — Delete an order
+// DELETE /api/orders/[id] — Delete an order (admin only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  // Check if user is authenticated
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const { error } = await supabase
     .from('orders')
     .delete()

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
-// GET /api/orders — Get all orders (or filter by phone)
+// GET /api/orders — Get all orders (admin only, or filter by phone for customers)
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const phone = searchParams.get('phone');
+
+  // Check if user is authenticated (admin)
+  const { data: { session } } = await supabase.auth.getSession();
+  const isAdmin = !!session;
 
   let query = supabase
     .from('orders')
@@ -12,7 +16,11 @@ export async function GET(request: NextRequest) {
     .order('created_at', { ascending: false });
 
   if (phone) {
+    // Customers can only see their own orders
     query = query.eq('phone', phone);
+  } else if (!isAdmin) {
+    // Non-admin users cannot see all orders
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { data, error } = await query;
@@ -24,7 +32,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(data);
 }
 
-// POST /api/orders — Create a new order
+// POST /api/orders — Create a new order (anyone can place orders)
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
