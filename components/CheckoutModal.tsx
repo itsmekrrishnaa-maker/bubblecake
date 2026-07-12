@@ -374,9 +374,6 @@ export default function CheckoutModal() {
                               })}
                             </div>
                           )}
-                          {item.message && (
-                            <p className="text-xs text-pink-500 mt-2 italic">&quot;{item.message}&quot;</p>
-                          )}
                         </div>
                       </div>
                       <p className="font-bold text-gray-800 whitespace-nowrap">
