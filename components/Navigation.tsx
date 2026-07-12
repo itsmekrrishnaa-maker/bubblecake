@@ -46,14 +46,6 @@ export default function Navigation() {
                 </Link>
               ))}
               <Link
-                href="/orders"
-                className={`nav-link text-gray-600 hover:text-pink-600 transition-colors font-medium ${
-                  pathname === '/orders' ? 'active text-pink-600' : ''
-                }`}
-              >
-                My Orders
-              </Link>
-              <Link
                 href="/contact"
                 className={`nav-link text-gray-600 hover:text-pink-600 transition-colors font-medium ${
                   pathname === '/contact' ? 'active text-pink-600' : ''
@@ -151,17 +143,6 @@ export default function Navigation() {
                 {category.name}
               </Link>
             ))}
-            <Link
-              href="/orders"
-              className={`block py-2 text-lg font-medium transition-colors ${
-                pathname === '/orders'
-                  ? 'text-pink-600'
-                  : 'text-gray-600 hover:text-pink-600'
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              My Orders
-            </Link>
             <Link
               href="/contact"
               className={`block py-2 text-lg font-medium transition-colors ${
