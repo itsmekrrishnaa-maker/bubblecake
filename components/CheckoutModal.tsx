@@ -320,45 +320,90 @@ export default function CheckoutModal() {
 
         <div className="p-5 space-y-6">
           {/* Order Summary */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Order Summary</h3>
+          <div className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-2xl p-5 border border-pink-100">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-2xl">🛒</span>
+              <h3 className="text-lg font-bold text-gray-800">Order Summary</h3>
+            </div>
+
+            {/* Delivery Location */}
             {zoneInfo && (
-              <div className="flex items-center gap-2 p-3 bg-pink-50 rounded-xl mb-3">
-                <span className="text-lg">{zoneInfo.icon}</span>
+              <div className="flex items-center gap-3 p-3 bg-white rounded-xl mb-4 shadow-sm">
+                <span className="text-xl">{zoneInfo.icon}</span>
                 <div>
-                  <p className="text-sm font-medium text-gray-800">{zoneInfo.name}</p>
+                  <p className="text-sm font-semibold text-gray-800">{zoneInfo.name}</p>
                   <p className="text-xs text-gray-500">{firstItemArea}</p>
                 </div>
               </div>
             )}
+
+            {/* Items */}
             <div className="space-y-3">
-              {items.map((item) => (
-                <div key={item.id} className="p-3 bg-gray-50 rounded-xl">
-                  <div className="flex justify-between">
-                    <span className="font-medium text-gray-800">{item.name}</span>
-                    <span className="font-medium">NPR {item.price.toLocaleString()}</span>
+              {items.map((item, index) => {
+                const itemAddons = Object.entries(item.addons).filter(([, qty]) => qty > 0);
+                return (
+                  <div key={item.id} className="bg-white rounded-xl p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <span className="w-7 h-7 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                          {index + 1}
+                        </span>
+                        <div>
+                          <h4 className="font-semibold text-gray-800">{item.name}</h4>
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                              {item.flavor}
+                            </span>
+                            <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                              {item.size}
+                            </span>
+                            <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                              Qty: {item.quantity}
+                            </span>
+                          </div>
+                          {itemAddons.length > 0 && (
+                            <div className="mt-2 space-y-0.5">
+                              {itemAddons.map(([addonId, qty]) => {
+                                const addon = addonData.find(a => a.id === addonId);
+                                if (!addon) return null;
+                                return (
+                                  <p key={addonId} className="text-xs text-gray-500">
+                                    {addon.emoji} {addon.name} × {qty}
+                                  </p>
+                                );
+                              })}
+                            </div>
+                          )}
+                          {item.message && (
+                            <p className="text-xs text-pink-500 mt-2 italic">&quot;{item.message}&quot;</p>
+                          )}
+                        </div>
+                      </div>
+                      <p className="font-bold text-gray-800 whitespace-nowrap">
+                        NPR {(item.price * item.quantity).toLocaleString()}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 capitalize">Flavor: {item.flavor} | Size: {item.size} | Qty: {item.quantity}</p>
-                  {Object.entries(item.addons).map(([addonId, qty]) => {
-                    const addon = addonData.find(a => a.id === addonId);
-                    if (!addon || qty === 0) return null;
-                    return <p key={addonId} className="text-xs text-gray-500">{addon.emoji} {addon.name} x{qty} - NPR {(addon.price * qty).toLocaleString()}</p>;
-                  })}
-                  {item.referenceImage && <p className="text-xs text-blue-500">📎 Reference image attached</p>}
-                </div>
-              ))}
+                );
+              })}
             </div>
-            {zoneInfo && (
-              <div className="flex justify-between text-sm mt-3">
-                <span className="text-gray-600">🚚 Delivery ({zoneInfo.name})</span>
-                <span className={`font-medium ${totalDeliveryFee === 0 ? 'text-green-600' : ''}`}>
+
+            {/* Price Breakdown */}
+            <div className="mt-4 pt-4 border-t border-pink-200 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium text-gray-800">NPR {total.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">🚚 Delivery</span>
+                <span className={`font-medium ${totalDeliveryFee === 0 ? 'text-green-600' : 'text-gray-800'}`}>
                   {totalDeliveryFee === 0 ? 'Free' : `NPR ${totalDeliveryFee}`}
                 </span>
               </div>
-            )}
-            <div className="flex justify-between items-center mt-3 pt-3 border-t font-bold text-lg">
-              <span>Total</span>
-              <span className="text-pink-600">NPR {totalWithDelivery.toLocaleString()}</span>
+              <div className="flex justify-between items-center pt-2 border-t border-pink-200">
+                <span className="text-lg font-bold text-gray-800">Total</span>
+                <span className="text-xl font-bold text-pink-600">NPR {totalWithDelivery.toLocaleString()}</span>
+              </div>
             </div>
           </div>
 
