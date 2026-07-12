@@ -259,6 +259,7 @@ export default function CheckoutModal() {
     if (!customerName.trim()) newErrors.name = 'Please enter your name';
     if (!phone.trim()) newErrors.phone = 'Please enter your phone number';
     else if (!/^\d{10}$/.test(phone.trim())) newErrors.phone = 'Phone number must be exactly 10 digits';
+    else if (!/^(98|97|96)\d{8}$/.test(phone.trim())) newErrors.phone = 'Must be valid Nepali number (98, 97, or 96 prefix)';
     if (!deliveryAddress.trim()) newErrors.address = 'Please enter your delivery address';
     else if (deliveryAddress.trim().length > 50) newErrors.address = 'Address must be 50 characters or less';
     if (paymentMethod === 'qr' && !paymentScreenshot) newErrors.screenshot = 'Please upload payment screenshot';
@@ -401,10 +402,18 @@ export default function CheckoutModal() {
                 onChange={(e) => { setPhone(e.target.value.replace(/\D/g, '').slice(0, 10)); if (errors.phone) setErrors((prev) => ({ ...prev, phone: undefined })); }}
                 placeholder="e.g., 9841234567"
                 maxLength={10}
-                className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.phone ? 'border-red-400' : 'border-gray-200 focus:border-pink-500'}`}
+                className={`w-full p-3 border-2 rounded-xl focus:outline-none ${errors.phone ? 'border-red-400' : phone.length === 10 && /^(98|97|96)\d{8}$/.test(phone) ? 'border-green-500' : 'border-gray-200 focus:border-pink-500'}`}
               />
               {errors.phone && <p className="text-sm text-red-500 mt-1">{errors.phone}</p>}
-              <p className="text-xs text-gray-400 mt-1">{phone.length}/10 digits</p>
+              {!errors.phone && phone.length === 10 && /^(98|97|96)\d{8}$/.test(phone) && (
+                <p className="text-sm text-green-600 mt-1">✓ Valid Nepali mobile number</p>
+              )}
+              {!errors.phone && phone.length > 0 && phone.length < 10 && (
+                <p className="text-xs text-gray-400 mt-1">{phone.length}/10 digits — must start with 98, 97, or 96</p>
+              )}
+              {!errors.phone && phone.length === 10 && !/^(98|97|96)\d{8}$/.test(phone) && (
+                <p className="text-sm text-red-500 mt-1">Must start with 98, 97, or 96</p>
+              )}
             </div>
           </div>
 
